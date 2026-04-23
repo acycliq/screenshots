@@ -7,13 +7,14 @@
     <style>
         :root {
             --bg-color: #000; 
-            --sidebar-bg: #0a0a0a;
-            --sidebar-item-hover: #161616;
+            --sidebar-bg: #111;
+            --sidebar-item-hover: #1a1a1a;
             --sidebar-item-active: #222;
             --text-color: #eee;
-            --accent-color: #00a8ff;
-            --border-color: #1a1a1a;
-            --count-text: #666;
+            --accent-color: #00ff88; /* Matching the green scrollbar vibe */
+            --border-color: #222;
+            --count-text: #888;
+            --input-bg: #1a1a1a;
         }
 
         body, html {
@@ -31,9 +32,9 @@
             height: 100vh;
         }
 
-        /* Sidebar */
+        /* --- Sidebar Overhaul --- */
         .sidebar {
-            width: 260px;
+            width: 300px;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -41,30 +42,41 @@
             z-index: 10;
         }
 
-        .sidebar-header {
-            padding: 20px;
+        .sidebar-search {
+            padding: 15px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .sidebar-header h1 {
+        .sidebar-search input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--input-bg);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
             font-size: 0.9rem;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #444;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .sidebar-search input:focus {
+            border-color: #555;
         }
 
         .cell-list {
             flex: 1;
             overflow-y: auto;
+            padding: 10px 0;
         }
 
         .cell-item {
-            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
             cursor: pointer;
-            transition: all 0.15s ease;
-            border-left: 3px solid transparent;
+            transition: background 0.1s;
+            gap: 12px;
+            border-left: 2px solid transparent;
         }
 
         .cell-item:hover {
@@ -76,20 +88,54 @@
             border-left-color: var(--accent-color);
         }
 
+        .cell-color-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .cell-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+
         .cell-name {
-            display: block;
+            font-size: 0.85rem;
             font-weight: 500;
-            font-size: 0.95rem;
-            color: #ccc;
+            color: #bbb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
         }
 
-        .cell-counts {
-            font-size: 0.8rem;
+        .cell-item.active .cell-name {
+            color: #fff;
+        }
+
+        .cell-count-small {
+            font-size: 0.75rem;
             color: var(--count-text);
-            margin-top: 4px;
+            font-family: monospace;
+            flex-shrink: 0;
         }
 
-        /* Main Display - Top/Bottom Split */
+        .eye-icon {
+            width: 16px;
+            height: 16px;
+            fill: #444;
+            flex-shrink: 0;
+        }
+
+        .cell-item.active .eye-icon {
+            fill: var(--accent-color);
+        }
+
+        /* --- Main Display (Top/Bottom) --- */
         .main-stage {
             flex: 1;
             display: flex;
@@ -101,7 +147,7 @@
         .split-view {
             flex: 1;
             display: flex;
-            flex-direction: column; /* Vertical stacking */
+            flex-direction: column;
         }
 
         .image-panel {
@@ -114,40 +160,32 @@
             border-bottom: 1px solid #111;
         }
 
-        .image-panel:last-child {
-            border-bottom: none;
-        }
-
         .panel-meta {
             position: absolute;
-            top: 20px;
-            left: 30px;
-            right: 30px;
+            top: 15px;
+            left: 20px;
+            right: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             z-index: 5;
             pointer-events: none;
         }
 
         .label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            color: #555;
+            color: #444;
             text-transform: uppercase;
             letter-spacing: 2px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            border-radius: 2px;
         }
 
         .count {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--accent-color);
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            border-radius: 2px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            border-radius: 3px;
         }
 
         .image-wrapper {
@@ -156,60 +194,68 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 5px;
         }
 
         .image-wrapper img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
 
-        .loading img {
-            opacity: 0;
-        }
+        .loading img { opacity: 0; }
 
-        /* Floating Cell Title Overlay */
         .cell-title-overlay {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 20px;
+            left: 25px;
             z-index: 10;
             pointer-events: none;
         }
 
         .cell-title-overlay h2 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 300;
             color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         .index-indicator {
             font-family: monospace;
-            color: #444;
-            font-size: 1rem;
-            margin-top: 5px;
+            color: #333;
+            font-size: 0.9rem;
+            margin-top: 4px;
         }
 
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #222; }
+        /* --- Custom Scrollbar (from reference) --- */
+        .cell-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .cell-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .cell-list::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+            border: 2px solid var(--sidebar-bg);
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>Atlas Comparison</h1>
+            <div class="sidebar-search">
+                <input type="text" id="filterInput" placeholder="Filter classes..." spellcheck="false">
             </div>
             <div id="cellList" class="cell-list"></div>
         </aside>
         
         <main class="main-stage">
             <div class="split-view">
-                <!-- TOP PANEL -->
                 <div class="image-panel">
                     <div class="panel-meta">
                         <div class="label">With Rho G</div>
@@ -220,7 +266,6 @@
                     </div>
                 </div>
                 
-                <!-- BOTTOM PANEL -->
                 <div class="image-panel">
                     <div class="panel-meta">
                         <div class="label">Without Rho G</div>
@@ -232,7 +277,6 @@
                 </div>
             </div>
 
-            <!-- Floating Title -->
             <div class="cell-title-overlay">
                 <h2 id="currentCellName">---</h2>
                 <div id="globalIndex" class="index-indicator"></div>
@@ -242,14 +286,28 @@
 
     <script>
         let dashboardData = [];
+        let filteredData = [];
         let currentIndex = -1;
+
+        const EYE_SVG = `<svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
+
+        // Deterministic color based on name
+        function getColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = Math.abs(hash % 360);
+            return `hsl(${h}, 60%, 50%)`;
+        }
 
         async function init() {
             try {
                 const response = await fetch('/api/data');
                 dashboardData = await response.json();
+                filteredData = [...dashboardData];
                 renderList();
-                if (dashboardData.length > 0) selectCell(0);
+                if (filteredData.length > 0) selectCell(0);
             } catch (error) {
                 console.error(error);
             }
@@ -258,52 +316,89 @@
         function renderList() {
             const listContainer = document.getElementById('cellList');
             listContainer.innerHTML = '';
-            dashboardData.forEach((item, index) => {
+            
+            filteredData.forEach((item, index) => {
+                const actualIndex = dashboardData.indexOf(item);
                 const div = document.createElement('div');
                 div.className = 'cell-item';
-                div.id = `item-${index}`;
+                div.id = `item-${actualIndex}`;
+                
                 div.innerHTML = `
-                    <span class="cell-name">${item.name}</span>
-                    <span class="cell-counts">${item.with.count.toLocaleString()} | ${item.without.count.toLocaleString()}</span>
+                    <div class="cell-color-icon" style="background: ${getColor(item.name)}"></div>
+                    <div class="cell-info">
+                        <span class="cell-name">${item.name}</span>
+                        <span class="cell-count-small">${item.with.count.toLocaleString()}</span>
+                    </div>
+                    ${EYE_SVG}
                 `;
-                div.onclick = () => selectCell(index);
+                
+                div.onclick = () => selectCell(actualIndex);
                 listContainer.appendChild(div);
             });
+
+            // Re-highlight if current cell is in filtered list
+            if (currentIndex !== -1) {
+                const currentEl = document.getElementById(`item-${currentIndex}`);
+                if (currentEl) currentEl.classList.add('active');
+            }
         }
 
-        function selectCell(index) {
-            if (index < 0 || index >= dashboardData.length) return;
+        function selectCell(actualIndex) {
+            if (actualIndex === -1) return;
             
-            if (currentIndex !== -1) document.getElementById(`item-${currentIndex}`).classList.remove('active');
+            // Remove previous active state
+            const prevActive = document.querySelector('.cell-item.active');
+            if (prevActive) prevActive.classList.remove('active');
             
-            currentIndex = index;
-            const item = dashboardData[index];
-            const activeEl = document.getElementById(`item-${index}`);
-            activeEl.classList.add('active');
-            activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            currentIndex = actualIndex;
+            const item = dashboardData[actualIndex];
+            const activeEl = document.getElementById(`item-${actualIndex}`);
+            
+            if (activeEl) {
+                activeEl.classList.add('active');
+                activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
 
             document.getElementById('currentCellName').textContent = item.name;
-            document.getElementById('globalIndex').textContent = `INDEX: ${String(index + 1).padStart(2, '0')} / ${dashboardData.length}`;
-            
-            const imgWith = document.getElementById('imgWith');
-            const imgWithout = document.getElementById('imgWithout');
+            document.getElementById('globalIndex').textContent = `INDEX: ${String(actualIndex + 1).padStart(2, '0')} / ${dashboardData.length}`;
             
             document.getElementById('wrapWith').classList.add('loading');
             document.getElementById('wrapWithout').classList.add('loading');
 
-            imgWith.src = item.with.image;
-            imgWithout.src = item.without.image;
+            document.getElementById('imgWith').src = item.with.image;
+            document.getElementById('imgWithout').src = item.without.image;
             
-            imgWith.onload = () => document.getElementById('wrapWith').classList.remove('loading');
-            imgWithout.onload = () => document.getElementById('wrapWithout').classList.remove('loading');
+            document.getElementById('imgWith').onload = () => document.getElementById('wrapWith').classList.remove('loading');
+            document.getElementById('imgWithout').onload = () => document.getElementById('wrapWithout').classList.remove('loading');
 
             document.getElementById('countWith').textContent = item.with.count.toLocaleString();
             document.getElementById('countWithout').textContent = item.without.count.toLocaleString();
         }
 
+        // Filter Logic
+        document.getElementById('filterInput').oninput = (e) => {
+            const val = e.target.value.toLowerCase();
+            filteredData = dashboardData.filter(item => 
+                item.name.toLowerCase().includes(val)
+            );
+            renderList();
+        };
+
+        // Keyboard Nav (through visible items)
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown') { e.preventDefault(); selectCell(Math.min(currentIndex + 1, dashboardData.length - 1)); }
-            else if (e.key === 'ArrowUp') { e.preventDefault(); selectCell(Math.max(currentIndex - 1, 0)); }
+            if (e.target.tagName === 'INPUT') return;
+            
+            const currentFilteredIdx = filteredData.findIndex(item => dashboardData.indexOf(item) === currentIndex);
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = filteredData[Math.min(currentFilteredIdx + 1, filteredData.length - 1)];
+                if (next) selectCell(dashboardData.indexOf(next));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = filteredData[Math.max(currentFilteredIdx - 1, 0)];
+                if (prev) selectCell(dashboardData.indexOf(prev));
+            }
         });
 
         init();
