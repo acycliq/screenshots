@@ -172,11 +172,14 @@
         }
 
         .label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 800;
-            color: #444;
+            color: #ccc; /* Much brighter */
             text-transform: uppercase;
             letter-spacing: 2px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 4px;
         }
 
         .count {
@@ -267,7 +270,7 @@
             <div class="split-view">
                 <div class="image-panel">
                     <div class="panel-meta">
-                        <div class="label">Without Rho G</div>
+                        <div class="label">Without Rho_G</div>
                         <div id="countWithout" class="count"></div>
                     </div>
                     <div class="image-wrapper" id="wrapWithout">
@@ -277,7 +280,7 @@
 
                 <div class="image-panel">
                     <div class="panel-meta">
-                        <div class="label">With Rho G</div>
+                        <div class="label">With Rho_G</div>
                         <div id="countWith" class="count"></div>
                     </div>
                     <div class="image-wrapper" id="wrapWith">
