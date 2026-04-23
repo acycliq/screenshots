@@ -21,6 +21,21 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         folders = ['with_rho_g', 'without_rho_g']
         manifests = {}
         screenshots = {}
+        
+        # Load color scheme
+        color_scheme = {}
+        color_file = Path('/home/dimitris/Desktop/cell_colour_scheme_yao.json')
+        if color_file.exists():
+            with open(color_file, 'r') as f:
+                raw_colors = json.load(f)
+                # Normalize keys for easier matching
+                for k, v in raw_colors.items():
+                    # "0261 CA1-ProS Glut_1" -> "CA1-ProS Glut"
+                    clean_k = ' '.join(k.split(' ')[1:]) # Remove ID
+                    clean_k = clean_k.split('_')[0] # Remove trailing _1
+                    color_scheme[clean_k] = v
+                    # Also keep full key just in case
+                    color_scheme[k] = v
 
         for folder in folders:
             folder_path = BASE_DIR / folder
@@ -49,8 +64,19 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
 
         result = []
         for name in sorted_names:
-            item = {'name': name, 'with': {}, 'without': {}}
+            item = {'name': name, 'with': {}, 'without': {}, 'color': '#888888'}
             
+            # Find color
+            if name in color_scheme:
+                item['color'] = color_scheme[name]
+            else:
+                # Try matching by removing the leading number "037 DG Glut" -> "DG Glut"
+                parts = name.split(' ')
+                if len(parts) > 1 and parts[0].isdigit():
+                    clean_name = ' '.join(parts[1:])
+                    if clean_name in color_scheme:
+                        item['color'] = color_scheme[clean_name]
+
             # Map with_rho_g
             with_idx = next((i for i, e in enumerate(manifests['with_rho_g']) if e['name'] == name), -1)
             if with_idx != -1 and with_idx < len(screenshots['with_rho_g']):

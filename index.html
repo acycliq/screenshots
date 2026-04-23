@@ -324,7 +324,7 @@
                 div.id = `item-${actualIndex}`;
                 
                 div.innerHTML = `
-                    <div class="cell-color-icon" style="background: ${getColor(item.name)}"></div>
+                    <div class="cell-color-icon" style="background: ${item.color}"></div>
                     <div class="cell-info">
                         <span class="cell-name">${item.name}</span>
                         <span class="cell-count-small">${item.with.count.toLocaleString()}</span>
