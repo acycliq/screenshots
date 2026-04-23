@@ -24,7 +24,7 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         
         # Load color scheme
         color_scheme = {}
-        color_file = Path('/home/dimitris/Desktop/cell_colour_scheme_yao.json')
+        color_file = BASE_DIR / 'cell_colour_scheme_yao.json'
         if color_file.exists():
             with open(color_file, 'r') as f:
                 raw_colors = json.load(f)
