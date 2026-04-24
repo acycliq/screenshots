@@ -256,8 +256,6 @@
             border: 2px solid var(--sidebar-bg);
         }
 
-        /* Utility */
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -307,15 +305,14 @@
 
         const EYE_SVG = `<svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
 
-        // Deterministic color based on name (legacy/fallback)
-        function getColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const h = Math.abs(hash % 360);
-            return `hsl(${h}, 60%, 50%)`;
-        }
+        const elCellName = document.getElementById('currentCellName');
+        const elGlobalIndex = document.getElementById('globalIndex');
+        const elWrapWith = document.getElementById('wrapWith');
+        const elWrapWithout = document.getElementById('wrapWithout');
+        const elImgWith = document.getElementById('imgWith');
+        const elImgWithout = document.getElementById('imgWithout');
+        const elCountWith = document.getElementById('countWith');
+        const elCountWithout = document.getElementById('countWithout');
 
         function init() {
             renderList();
@@ -326,20 +323,32 @@
             const listContainer = document.getElementById('cellList');
             listContainer.innerHTML = '';
             
-            filteredData.forEach((item, index) => {
+            filteredData.forEach((item) => {
                 const actualIndex = dashboardData.indexOf(item);
                 const div = document.createElement('div');
                 div.className = 'cell-item';
                 div.id = `item-${actualIndex}`;
-                
-                div.innerHTML = `
-                    <div class="cell-color-icon" style="background: ${item.color}"></div>
-                    <div class="cell-info">
-                        <span class="cell-name">${item.name}</span>
-                        <span class="cell-count-small">${item.with.count.toLocaleString()}</span>
-                    </div>
-                    ${EYE_SVG}
-                `;
+
+                const colorIcon = document.createElement('div');
+                colorIcon.className = 'cell-color-icon';
+                colorIcon.style.background = item.color;
+
+                const cellInfo = document.createElement('div');
+                cellInfo.className = 'cell-info';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'cell-name';
+                nameSpan.textContent = item.name;
+
+                const countSpan = document.createElement('span');
+                countSpan.className = 'cell-count-small';
+                countSpan.textContent = item.with.count.toLocaleString();
+
+                cellInfo.appendChild(nameSpan);
+                cellInfo.appendChild(countSpan);
+                div.appendChild(colorIcon);
+                div.appendChild(cellInfo);
+                div.innerHTML += EYE_SVG;
                 
                 div.onclick = () => selectCell(actualIndex);
                 listContainer.appendChild(div);
@@ -368,20 +377,22 @@
                 activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            document.getElementById('currentCellName').textContent = item.name;
-            document.getElementById('globalIndex').textContent = `INDEX: ${String(actualIndex + 1).padStart(2, '0')} / ${dashboardData.length}`;
-            
-            document.getElementById('wrapWith').classList.add('loading');
-            document.getElementById('wrapWithout').classList.add('loading');
+            elCellName.textContent = item.name;
+            elGlobalIndex.textContent = `INDEX: ${String(actualIndex + 1).padStart(2, '0')} / ${dashboardData.length}`;
 
-            document.getElementById('imgWith').src = item.with.image;
-            document.getElementById('imgWithout').src = item.without.image;
-            
-            document.getElementById('imgWith').onload = () => document.getElementById('wrapWith').classList.remove('loading');
-            document.getElementById('imgWithout').onload = () => document.getElementById('wrapWithout').classList.remove('loading');
+            elWrapWith.classList.add('loading');
+            elWrapWithout.classList.add('loading');
 
-            document.getElementById('countWith').textContent = item.with.count.toLocaleString();
-            document.getElementById('countWithout').textContent = item.without.count.toLocaleString();
+            elImgWith.onload = () => elWrapWith.classList.remove('loading');
+            elImgWith.onerror = () => elWrapWith.classList.remove('loading');
+            elImgWithout.onload = () => elWrapWithout.classList.remove('loading');
+            elImgWithout.onerror = () => elWrapWithout.classList.remove('loading');
+
+            elImgWith.src = item.with.image;
+            elImgWithout.src = item.without.image;
+
+            elCountWith.textContent = item.with.count.toLocaleString();
+            elCountWithout.textContent = item.without.count.toLocaleString();
         }
 
         // Filter Logic
